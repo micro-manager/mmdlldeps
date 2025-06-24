@@ -1,9 +1,10 @@
-import pkg_resources
+import functools
+import importlib.resources
 import subprocess
 from collections import OrderedDict
 
 
-_VSENV_BATCH_FILE = pkg_resources.resource_filename(__name__, "vsenv.bat")
+_VSENV_BATCH_FILE = importlib.resources.files(__name__) / "vsenv.bat"
 
 _FIRST_WORDS = "Dump of file "
 _FILE_TYPE_PREFIX = "File Type: "
@@ -18,24 +19,20 @@ _IMPORT_LIST_HEADER = "Section contains the following imports:"
 _DELAY_IMPORT_LIST_HEADER = "Section contains the following delay load imports:"
 
 
-_CACHED_VS_ENV = None
-
-
+@functools.cache
 def _get_vs_env():
     # Return the environment variables resulting from setting up the Visual
     # Studio Developer Command Prompt. This is slow, so doing it once helps.
-    global _CACHED_VS_ENV
-    if not _CACHED_VS_ENV:
+    with importlib.resources.as_file(_VSENV_BATCH_FILE) as vsenv_bat:
         output = subprocess.run(
-            [_VSENV_BATCH_FILE],
+            [vsenv_bat],
             capture_output=True,
             check=True,
             text=True,
         ).stdout
-        _CACHED_VS_ENV = dict(
-            line.split("=", 1) for line in output.splitlines() if line
-        )
-    return _CACHED_VS_ENV
+    return dict(
+        line.split("=", 1) for line in output.splitlines() if line
+    )
 
 
 def _get_dumpbin_exe():

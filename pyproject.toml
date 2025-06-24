@@ -1,6 +1,16 @@
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mmdlldeps"
+version = "0.1.0.dev0"
+license = "MIT"
+requires-python = ">= 3.9"
+dependencies = []
+
+[project.scripts]
+mmdlldeps = "mmdlldeps.__main__:main"
 
 [tool.black]
 line-length = 80
